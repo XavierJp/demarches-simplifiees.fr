@@ -7,10 +7,12 @@
           = b.text
 
   - else
-    = form.select :value,
+    -#= form.select :value,
         champ.options,
         { selected: champ.selected_options,
           disabled: champ.disabled_options },
         multiple: true,
         class: 'select2'
+    = react_component("ComboMultipleDropdownList", options: champ.options)
+    = champ.options
 
