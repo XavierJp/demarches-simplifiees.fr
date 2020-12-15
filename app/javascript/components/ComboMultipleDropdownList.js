@@ -24,9 +24,10 @@ const Context = createContext();
 function ComboMultipleDropdownList({ options, hiddenFieldId, selected }) {
   const [term, setTerm] = useState('');
   const [selections, setSelections] = useState(selected);
-  const results = useMemo(() => (term ? matchSorter(options, term) : options), [
-    term
-  ]);
+  const results = useMemo(
+    () => (term ? matchSorter(options, term) : options).filter((o) => o),
+    [term]
+  );
   const hiddenField = useMemo(
     () => document.querySelector(`input[data-uuid="${hiddenFieldId}"]`),
     [hiddenFieldId]
@@ -67,9 +68,11 @@ function ComboMultipleDropdownList({ options, hiddenFieldId, selected }) {
           flexWrap: 'wrap'
         }}
       >
-        {selections.map((selection) => (
-          <ComboboxToken key={selection} value={selection} />
-        ))}
+        <ul aria-live="polite" aria-atomic={true}>
+          {selections.map((selection) => (
+            <ComboboxToken key={selection} value={selection} />
+          ))}
+        </ul>
         <ComboboxTokenInput
           value={term}
           onChange={handleChange}
@@ -147,7 +150,7 @@ function ComboboxTokenLabel({ onRemove, onKeyDown, ...props }) {
 
   return (
     <Context.Provider value={context}>
-      <label onKeyDown={wrapEvent(onKeyDown, handleKeyDown)} {...props} />
+      <div onKeyDown={wrapEvent(onKeyDown, handleKeyDown)} {...props} />
     </Context.Provider>
   );
 }
@@ -160,14 +163,16 @@ function ComboboxToken({ value, ...props }) {
   const selected = selectionsRef.current[selectionNavIndex] === value;
 
   return (
-    <span
+    <li
       style={
-        selected ? { ...selectionStyle, backgroundColor: 'black', color: 'white' } : selectionStyle
+        selected
+          ? { ...selectionStyle, backgroundColor: 'black', color: 'white' }
+          : selectionStyle
       }
       {...props}
     >
       {value}
-    </span>
+    </li>
   );
 }
 
