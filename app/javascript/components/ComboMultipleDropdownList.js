@@ -162,7 +162,7 @@ function ComboboxToken({ value, ...props }) {
   return (
     <span
       style={
-        selected ? { ...selectionStyle, background: 'green' } : selectionStyle
+        selected ? { ...selectionStyle, backgroundColor: 'black', color: 'white' } : selectionStyle
       }
       {...props}
     >
@@ -208,11 +208,12 @@ function ComboboxTokenInput({ onKeyDown, ...props }) {
 }
 
 const selectionStyle = {
-  fontSize: '11px',
-  background: 'red',
+  fontWeight: 'normal',
+  fontSize: '14px',
   border: 'solid 1px #aaa',
+  color: '#333333',
   margin: '0.25rem',
-  borderRadius: '1000px',
+  borderRadius: '10px',
   padding: '0.2rem 0.5rem',
   userSelect: 'none'
 };
