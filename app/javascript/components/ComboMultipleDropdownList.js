@@ -7,6 +7,7 @@ import React, {
   useEffect,
   useLayoutEffect
 } from 'react';
+import PropTypes from 'prop-types';
 import {
   Combobox,
   ComboboxInput,
@@ -149,6 +150,10 @@ function ComboboxTokenLabel({ onRemove, ...props }) {
   );
 }
 
+ComboboxTokenLabel.propTypes = {
+  onRemove: PropTypes.func
+};
+
 function ComboboxSeparator({ value }) {
   return (
     <li role="option" data-reach-combobox-option>
@@ -156,6 +161,10 @@ function ComboboxSeparator({ value }) {
     </li>
   );
 }
+
+ComboboxSeparator.propTypes = {
+  value: PropTypes.string
+};
 
 function ComboboxToken({ value, ...props }) {
   const { selectionsRef, onRemove } = useContext(Context);
@@ -178,5 +187,15 @@ function ComboboxToken({ value, ...props }) {
     </li>
   );
 }
+
+ComboboxToken.propTypes = {
+  value: PropTypes.string
+};
+
+ComboMultipleDropdownList.propTypes = {
+  options: PropTypes.arrayOf(PropTypes.string),
+  hiddenFieldId: PropTypes.string,
+  selected: PropTypes.arrayOf(PropTypes.string)
+};
 
 export default ComboMultipleDropdownList;
