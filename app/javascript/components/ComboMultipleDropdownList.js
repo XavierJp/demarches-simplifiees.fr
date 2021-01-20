@@ -25,8 +25,15 @@ function ComboMultipleDropdownList({ options, hiddenFieldId, selected }) {
   const [term, setTerm] = useState('');
   const [selections, setSelections] = useState(selected);
   const results = useMemo(
-    () => (term ? matchSorter(options, term) : options).filter((o) => o),
-    [term]
+    () =>
+      (term
+        ? matchSorter(
+            options.filter((o) => !o.startsWith('--')),
+            term
+          )
+        : options
+      ).filter((o) => o && !selections.includes(o)),
+    [term, selections]
   );
   const hiddenField = useMemo(
     () => document.querySelector(`input[data-uuid="${hiddenFieldId}"]`),
@@ -101,9 +108,12 @@ function ComboMultipleDropdownList({ options, hiddenFieldId, selected }) {
             </p>
           )}
           <ComboboxList>
-            {results.map((value, index) => (
-              <ComboboxOption key={index} value={value} />
-            ))}
+            {results.map((value, index) => {
+              if (value.startsWith('--')) {
+                return <ComboboxSeparator key={index} value={value} />;
+              }
+              return <ComboboxOption key={index} value={value} />;
+            })}
           </ComboboxList>
         </ComboboxPopover>
       )}
@@ -152,6 +162,14 @@ function ComboboxTokenLabel({ onRemove, onKeyDown, ...props }) {
     <Context.Provider value={context}>
       <div onKeyDown={wrapEvent(onKeyDown, handleKeyDown)} {...props} />
     </Context.Provider>
+  );
+}
+
+function ComboboxSeparator({ value }) {
+  return (
+    <li role="option" data-reach-combobox-option>
+      {value.slice(2, -2)}
+    </li>
   );
 }
 
