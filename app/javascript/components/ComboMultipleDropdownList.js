@@ -14,7 +14,6 @@ import {
   ComboboxOption,
   ComboboxPopover
 } from '@reach/combobox';
-import { wrapEvent } from '@reach/utils';
 import '@reach/combobox/styles.css';
 import matchSorter from 'match-sorter';
 import { fire } from '@utils';
@@ -22,6 +21,7 @@ import { fire } from '@utils';
 const Context = createContext();
 
 function ComboMultipleDropdownList({ options, hiddenFieldId, selected }) {
+  const inputRef = useRef();
   const [term, setTerm] = useState('');
   const [selections, setSelections] = useState(selected);
   const results = useMemo(
@@ -59,6 +59,7 @@ function ComboMultipleDropdownList({ options, hiddenFieldId, selected }) {
 
   const onRemove = (value) => {
     saveSelection(selections.filter((s) => s !== value));
+    inputRef.current.focus();
   };
 
   return (
@@ -75,12 +76,17 @@ function ComboMultipleDropdownList({ options, hiddenFieldId, selected }) {
           flexWrap: 'wrap'
         }}
       >
-        <ul aria-live="polite" aria-atomic={true}>
+        <ul
+          aria-live="polite"
+          aria-atomic={true}
+          data-reach-combobox-token-list
+        >
           {selections.map((selection) => (
             <ComboboxToken key={selection} value={selection} />
           ))}
         </ul>
-        <ComboboxTokenInput
+        <ComboboxInput
+          ref={inputRef}
           value={term}
           onChange={handleChange}
           autocomplete={false}
@@ -123,44 +129,22 @@ function ComboMultipleDropdownList({ options, hiddenFieldId, selected }) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function ComboboxTokenLabel({ onRemove, onKeyDown, ...props }) {
+function ComboboxTokenLabel({ onRemove, ...props }) {
   const selectionsRef = useRef([]);
-  const [selectionNavIndex, setSelectionNavIndex] = useState(-1);
 
   useLayoutEffect(() => {
     selectionsRef.current = [];
     return () => (selectionsRef.current = []);
   });
 
-  const handleKeyDown = (event) => {
-    if (event.key === 'ArrowLeft') {
-      if (selectionNavIndex > 0) {
-        setSelectionNavIndex(selectionNavIndex - 1);
-      } else if (selectionsRef.current.length > 0) {
-        setSelectionNavIndex(selectionsRef.current.length - 1);
-      }
-    } else if (event.key === 'ArrowRight') {
-      if (selectionNavIndex === selectionsRef.current.length - 1) {
-        setSelectionNavIndex(-1);
-      } else if (selectionNavIndex < selectionsRef.current.length - 1) {
-        setSelectionNavIndex(selectionNavIndex + 1);
-      } else if (selectionNavIndex < 0) {
-        setSelectionNavIndex(0);
-      }
-    } else {
-      setSelectionNavIndex(-1);
-    }
-  };
-
   const context = {
     onRemove,
-    selectionsRef,
-    selectionNavIndex
+    selectionsRef
   };
 
   return (
     <Context.Provider value={context}>
-      <div onKeyDown={wrapEvent(onKeyDown, handleKeyDown)} {...props} />
+      <div {...props} />
     </Context.Provider>
   );
 }
@@ -174,71 +158,25 @@ function ComboboxSeparator({ value }) {
 }
 
 function ComboboxToken({ value, ...props }) {
-  const { selectionsRef, selectionNavIndex } = useContext(Context);
+  const { selectionsRef, onRemove } = useContext(Context);
   useEffect(() => {
     selectionsRef.current.push(value);
   });
-  const selected = selectionsRef.current[selectionNavIndex] === value;
 
   return (
     <li
-      style={
-        selected
-          ? { ...selectionStyle, backgroundColor: 'black', color: 'white' }
-          : selectionStyle
-      }
+      data-reach-combobox-token
+      tabIndex="0"
+      onKeyDown={(event) => {
+        if (event.key === 'Backspace') {
+          onRemove(value);
+        }
+      }}
       {...props}
     >
       {value}
     </li>
   );
 }
-
-function ComboboxTokenInput({ onKeyDown, ...props }) {
-  const { onRemove, selectionsRef, selectionNavIndex } = useContext(Context);
-  const ref = useRef();
-  const handleKeyDown = (event) => {
-    const { value } = event.target;
-    if (
-      event.key === 'Backspace' &&
-      value === '' &&
-      selectionsRef.current.length > 0
-    ) {
-      onRemove(
-        selectionsRef.current[
-          selectionNavIndex === -1
-            ? selectionsRef.current.length - 1
-            : selectionNavIndex
-        ]
-      );
-    } else if (event.key === 'Backspace' && value.length === 1) {
-      setTimeout(() => {
-        ref.current.blur();
-        setTimeout(() => {
-          ref.current.focus();
-        }, 50);
-      }, 50);
-    }
-  };
-
-  return (
-    <ComboboxInput
-      ref={ref}
-      onKeyDown={wrapEvent(onKeyDown, handleKeyDown)}
-      {...props}
-    />
-  );
-}
-
-const selectionStyle = {
-  fontWeight: 'normal',
-  fontSize: '14px',
-  border: 'solid 1px #aaa',
-  color: '#333333',
-  margin: '0.25rem',
-  borderRadius: '10px',
-  padding: '0.2rem 0.5rem',
-  userSelect: 'none'
-};
 
 export default ComboMultipleDropdownList;

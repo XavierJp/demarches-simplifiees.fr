@@ -305,6 +305,26 @@
     border-color: $blue;
   }
 
+  [data-reach-combobox-token-list] {
+    display: flex;
+  }
+
+  [data-reach-combobox-token] {
+    font-weight: normal;
+    font-size: 14px;
+    border: solid 1px #aaa;
+    color: #333333;
+    margin: 0.25rem;
+    border-radius: 10px;
+    padding: 0.2rem 0.5rem;
+    cursor: pointer;
+  }
+
+  [data-reach-combobox-token]:focus {
+    background-color: black;
+    color: white;
+  }
+
   .select2 {
     min-width: 50%;
   }
